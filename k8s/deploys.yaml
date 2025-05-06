@@ -49,7 +49,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ghcr.io/<YOUR_GITHUB_USERNAME>/backend:1.0
+        image: ghcr.io/shukkai/backend:1.0
         env:
           - { name: PORT,  value: "8888" }
           - { name: HOST,  value: "0.0.0.0" }
@@ -76,9 +76,11 @@ spec:
     metadata:
       labels: { app: frontend }
     spec:
+      imagePullSecrets:
+      - name: ghcr-creds
       containers:
       - name: frontend
-        image: ghcr.io/<YOUR_GITHUB_USERNAME>/frontend:1.0
+        image: ghcr.io/shukkai/frontend:1.0
         ports:
           - containerPort: 80
         livenessProbe:
