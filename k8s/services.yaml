@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  clusterIP: None                 # Headless，讓 backend 用 mongo:27017 直連
+  selector: { app: mongo }
+  ports:
+    - port: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector: { app: backend }
+  ports:
+    - port: 8888
+      targetPort: 8888
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector: { app: frontend }
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
