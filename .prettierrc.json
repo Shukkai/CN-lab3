@@ -4,6 +4,5 @@
   "printWidth": 120,
   "trailingComma": "none",
   "arrowParens": "always",
-  "parser": "typescript",
   "bracketSpacing": true
 }

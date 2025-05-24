@@ -1,0 +1,15 @@
+# .prettierignore
+*.yml
+*.yaml
+*.env
+*.env.*
+Dockerfile
+**/package-lock.json
+**/pnpm-lock.yaml
+**/tsconfig*.json
+**/README.md
+**/LICENSE
+**/*.svg
+**/*.css
+**/*.html
+**/*.conf
