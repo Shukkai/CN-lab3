@@ -1,21 +1,11 @@
-# GitHub 工作流程、設定檔
 .github/**/*.yml
 .vscode/**
-.prettierrc.json
-
-# Devops
+*.lock
+node_modules/**
+dist/**
+coverage/**
 Dockerfile*
 docker-compose.yaml
 k8s/**
-
-# 鎖檔、產出物
-*.lock
-coverage/**
-dist/**
-node_modules/**
-
-# 其他非程式碼
-*.md
 *.svg
-*.png
-*.jpg
+*.md

@@ -86,16 +86,15 @@ jobs:
         if: steps.prettier.outcome == 'failure'
         run: npx prettier --write . --ignore-unknown
 
-      - name: Commit formatted code
-        if: steps.prettier.outcome == 'failure'
+      - name: Commit formatted files
+        if: steps.backend-is-formatted.outcome != 'success' || steps.frontend-is-formatted.outcome != 'success'
+          && github.event_name == 'push'
+          && github.repository == github.event.repository.full_name
+        uses: stefanzweifel/git-auto-commit-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          USERNAME: ${{ secrets.GHCR_USERNAME }}
-        run: |
-          git config --global user.name "${USERNAME}"
-          git config --global user.email "${USERNAME}@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-          git add -A
-          # git-auto-commit-action 也可，但直接用 git 兩行最單純
-          git commit -m "style: auto-format code [skip ci]" || exit 0
-          git push --no-verify
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # PAT
+        with:
+          commit_message: "[AUTO] Format javascript files [skip ci]"
+          commit_user_name: ${{ secrets.GHCR_USERNAME }}
+          commit_user_email: "${{ secrets.GHCR_USERNAME }}@users.noreply.github.com"
+          push_options: --no-verify
