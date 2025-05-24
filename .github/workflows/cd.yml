@@ -19,8 +19,9 @@ jobs:
     - name: Extract repo name
       id: repo
       run: |
-        echo "repo_name=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)" >> $GITHUB_OUTPUT
-
+        REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')
+        echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
+        
     - name: Build Docker image
       run: |
         docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ steps.repo.outputs.repo_name }}:latest .
