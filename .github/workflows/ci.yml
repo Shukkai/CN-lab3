@@ -50,22 +50,7 @@ jobs:
           echo "No previous coverage found. Skipping comparison."
         fi
 
-    - name: Check & Format Changed Files
-      run: |
-        CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- '*.ts' '*.js')
-        if [ -z "$CHANGED" ]; then
-          echo "No relevant TS/JS files changed."
-          exit 0
-        fi
-
-        echo "Checking formatting for:"
-        echo "$CHANGED"
-
-        npx prettier --check $CHANGED || {
-          echo "Formatting issues found. Applying Prettier..."
-          npx prettier --write $CHANGED
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git commit -am "chore: auto format by Prettier"
-          git push
-        }
+    - name: Checkout full history
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 
