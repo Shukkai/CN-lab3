@@ -53,11 +53,11 @@ jobs:
         run: |
           echo "🔍 Checking old and new coverage..."
           echo "Current run: ./backend/coverage/coverage-final.json"
-          echo "Previous run: ./old-coverage/coverage-final.json"
+          echo "Previous run: ./old-coverage/coverage/coverage-final.json"
 
-          if [ -f ./old-coverage/coverage-final.json ] && [ -f ./backend/coverage/coverage-final.json ]; then
+          if [ -f ./old-coverage/coverage/coverage-final.json ] && [ -f ./backend/coverage/coverage-final.json ]; then
             NEW=$(jq '.total.lines.pct' ./backend/coverage/coverage-final.json)
-            OLD=$(jq '.total.lines.pct' ./old-coverage/coverage-final.json)
+            OLD=$(jq '.total.lines.pct' ./old-coverage/coverage/coverage-final.json)
             echo "📊 Previous coverage: $OLD%"
             echo "📈 Current coverage:  $NEW%"
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
