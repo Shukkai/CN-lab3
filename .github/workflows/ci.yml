@@ -36,10 +36,10 @@ jobs:
     - name: Auto-commit changes
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: "style: auto-format code"
+        commit_message: "style: auto-format code [skip ci]"
         commit_user_name: github-actions[bot]
         commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
-        # 避免無限遞迴，例如 commit message 包含 [skip ci]
+        token: ${{ secrets.GH_TOKEN }}         # ✅ 使用你儲存的 PAT
         push_options: '--follow-tags --no-verify'
 
   test-format:
