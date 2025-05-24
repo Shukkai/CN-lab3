@@ -30,17 +30,18 @@ jobs:
 
     # 你可以代換成 eslint --fix 或其他工具
     - name: Run Prettier
-      run: npx prettier --write .
+      run: npx prettier --write 
+    - name: Setup git identity and remote with PAT
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
 
-    # 只有當檔案真的被改動時才 commit
     - name: Auto-commit changes
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: "style: auto-format code [skip ci]"
-        commit_user_name: github-actions[bot]
-        commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
-        token: ${{ secrets.GH_TOKEN }}         # ✅ 使用你儲存的 PAT
-        push_options: '--follow-tags --no-verify'
+        commit_message: style: auto-format code [skip ci]
+        push_options: --follow-tags --no-verify
 
   test-format:
     needs: auto-format          # 格式化完再跑測試
