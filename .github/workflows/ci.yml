@@ -43,6 +43,7 @@ jobs:
           name: coverage-report
           path: old-coverage
           if_no_artifact_found: warn
+          github_token: ${{ secrets.GH_TOKEN }}   # 重要：用 PAT 取代預設 Token
 
       - name: Compare coverage
         run: |
