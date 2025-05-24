@@ -1,14 +1,21 @@
-# Ignore CI, Kubernetes, Docker, build outputs, and other non-source files
+# GitHub 工作流程、設定檔
 .github/**/*.yml
-*.yml
-*.yaml
+.vscode/**
+.prettierrc.json
+
+# Devops
 Dockerfile*
 docker-compose.yaml
 k8s/**
-.vscode/**
-node_modules/**
-dist/**
-coverage/**
+
+# 鎖檔、產出物
 *.lock
+coverage/**
+dist/**
+node_modules/**
+
+# 其他非程式碼
+*.md
 *.svg
-public/**
+*.png
+*.jpg

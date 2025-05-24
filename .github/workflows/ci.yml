@@ -88,9 +88,14 @@ jobs:
 
       - name: Commit formatted code
         if: steps.prettier.outcome == 'failure'
-        uses: stefanzweifel/git-auto-commit-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
-        with:
-          commit_message: ${{ env.FORMAT_COMMIT_MSG }}
-          push_options: --no-verify
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          USERNAME: ${{ secrets.GHCR_USERNAME }}
+        run: |
+          git config --global user.name "${USERNAME}"
+          git config --global user.email "${USERNAME}@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
+          git add -A
+          # git-auto-commit-action 也可，但直接用 git 兩行最單純
+          git commit -m "style: auto-format code [skip ci]" || exit 0
+          git push --no-verify
