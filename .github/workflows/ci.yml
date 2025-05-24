@@ -43,7 +43,7 @@ jobs:
           name: coverage-report
           path: old-coverage
           if_no_artifact_found: warn
-          github_token: ${{ secrets.GH_TOKEN }}   # 重要：用 PAT 取代預設 Token
+          github_token: ${{ secrets.GHCR_TOKEN }}   # 重要：用 PAT 取代預設 Token
 
       - name: Compare coverage
         run: |
@@ -90,7 +90,7 @@ jobs:
         if: steps.prettier.outcome == 'failure'
         uses: stefanzweifel/git-auto-commit-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
         with:
           commit_message: ${{ env.FORMAT_COMMIT_MSG }}
           push_options: --no-verify
