@@ -1,4 +1,4 @@
-name: CI - Test, Coverage, Format
+name: CI – Test, Coverage, Format
 
 on:
   push:
@@ -6,12 +6,51 @@ on:
   pull_request:
 
 jobs:
+  auto-format:
+    runs-on: ubuntu-latest
+    # 只對非 Fork 的 push 分支執行自動 commit（PR 仍會跑但不 push）
+    if: github.event_name == 'push' && github.repository == github.event.repository.full_name
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        # 取完整歷史，才能安全地 commit & push
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: npm
+
+    - name: Install deps (formatter only)
+      run: npm ci --ignore-scripts
+
+    # 你可以代換成 eslint --fix 或其他工具
+    - name: Run Prettier
+      run: npx prettier --write .
+
+    # 只有當檔案真的被改動時才 commit
+    - name: Auto-commit changes
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "style: auto-format code"
+        commit_user_name: github-actions[bot]
+        commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+        # 避免無限遞迴，例如 commit message 包含 [skip ci]
+        push_options: '--follow-tags --no-verify'
+
   test-format:
+    needs: auto-format          # 格式化完再跑測試
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0           # 取完整歷史以比較覆蓋率
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -49,8 +88,3 @@ jobs:
         else
           echo "No previous coverage found. Skipping comparison."
         fi
-
-    - name: Checkout full history
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 
