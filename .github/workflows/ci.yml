@@ -51,16 +51,23 @@ jobs:
 
       - name: Compare coverage
         run: |
-          if [ -f old-coverage/coverage-final.json ]; then
-            NEW=$(jq '.total.lines.pct' ./backend/${{ env.COVERAGE_DIR }}/coverage-final.json)
-            OLD=$(jq '.total.lines.pct' old-coverage/coverage-final.json)
-            echo "Previous: $OLD%   Current: $NEW%"
+          echo "🔍 Checking old and new coverage..."
+          echo "Current run: ./backend/coverage/coverage-final.json"
+          echo "Previous run: ./old-coverage/coverage-final.json"
+
+          if [ -f ./old-coverage/coverage-final.json ] && [ -f ./backend/coverage/coverage-final.json ]; then
+            NEW=$(jq '.total.lines.pct' ./backend/coverage/coverage-final.json)
+            OLD=$(jq '.total.lines.pct' ./old-coverage/coverage-final.json)
+            echo "📊 Previous coverage: $OLD%"
+            echo "📈 Current coverage:  $NEW%"
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
-              echo "Coverage dropped"
+              echo "❌ Coverage dropped: $NEW% < $OLD%"
               exit 1
+            else
+              echo "✅ Coverage OK: $NEW% >= $OLD%"
             fi
           else
-            echo "No previous coverage found; skipping comparison."
+            echo "⚠️ Coverage files not found; skipping comparison."
           fi
 
   auto-format:
