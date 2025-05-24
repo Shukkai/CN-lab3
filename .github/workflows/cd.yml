@@ -13,19 +13,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Log in to GitHub Container Registry (GHCR)
-      run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
-
-    - name: Extract repo name
-      id: repo
+    - name: Extract lowercase repo and user
+      id: vars
       run: |
-        REPO_NAME=$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')
-        echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
-        
+        echo "repo_name=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+        echo "user_name=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1 | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+    - name: Log in to GitHub Container Registry (GHCR)
+      run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ steps.vars.outputs.user_name }}" --password-stdin
+
     - name: Build Docker image
       run: |
-        docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ steps.repo.outputs.repo_name }}:latest .
+        docker build -t ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}:latest .
 
     - name: Push Docker image to GHCR
       run: |
-        docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/${{ steps.repo.outputs.repo_name }}:latest
+        docker push ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}:latest
