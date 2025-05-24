@@ -1,4 +1,4 @@
-name: CI – Test, Coverage, Format
+name: CI - Test, Coverage, Format
 
 on:
   push:
@@ -8,14 +8,12 @@ on:
 jobs:
   auto-format:
     runs-on: ubuntu-latest
-    # 只對非 Fork 的 push 分支執行自動 commit（PR 仍會跑但不 push）
     if: github.event_name == 'push' && github.repository == github.event.repository.full_name
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        # 取完整歷史，才能安全地 commit & push
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -28,9 +26,9 @@ jobs:
     - name: Install deps (formatter only)
       run: npm ci --ignore-scripts
 
-    # 你可以代換成 eslint --fix 或其他工具
     - name: Run Prettier
-      run: npx prettier --write 
+      run: npx prettier --write .
+
     - name: Setup git identity and remote with PAT
       run: |
         git config --global user.name "github-actions[bot]"
@@ -44,14 +42,14 @@ jobs:
         push_options: --follow-tags --no-verify
 
   test-format:
-    needs: auto-format          # 格式化完再跑測試
+    needs: auto-format
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0           # 取完整歷史以比較覆蓋率
+        fetch-depth: 0
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -76,7 +74,7 @@ jobs:
       with:
         name: coverage-report
         path: old-coverage
-        if_no_artifact_found: warn       
+        if_no_artifact_found: warn
 
     - name: Compare coverage
       run: |
