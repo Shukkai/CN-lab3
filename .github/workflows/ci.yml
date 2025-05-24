@@ -1,0 +1,68 @@
+name: CI - Test, Coverage, Format
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Run Tests with Coverage
+      run: npm run test -- --coverage
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage/
+
+    - name: Download Previous Coverage (Optional)
+      id: download_prev
+      continue-on-error: true
+      uses: dawidd6/action-download-artifact@v3
+      with:
+        name: coverage-report
+        workflow: ci.yaml
+        path: old-coverage
+
+    - name: Compare Coverage and Fail if Decreased
+      run: |
+        if [ -f old-coverage/coverage-summary.json ]; then
+          NEW=$(jq .total.lines.pct coverage/coverage-summary.json)
+          OLD=$(jq .total.lines.pct old-coverage/coverage-summary.json)
+          echo "Current: $NEW%, Previous: $OLD%"
+          awk -v new=$NEW -v old=$OLD 'BEGIN {exit (new < old ? 1 : 0)}'
+        else
+          echo "No previous coverage found. Skipping check."
+        fi
+
+    - name: Format Changed Files with Prettier
+      run: |
+        FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- '*.js' '*.ts')
+        if [ -n "$FILES" ]; then
+          echo "Checking format on: $FILES"
+          npx prettier --check $FILES || {
+            echo "Formatting required. Applying..."
+            npx prettier --write $FILES
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git commit -am "chore: auto format by Prettier in CI"
+            git push
+          }
+        else
+          echo "No JS/TS files to format."
+        fi
