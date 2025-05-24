@@ -1,4 +1,4 @@
-name: CI - Test, Coverage, Format
+name: CI
 
 on:
   push:
@@ -6,85 +6,88 @@ on:
   pull_request:
 
 jobs:
-  auto-format:
+  lint-format:
     runs-on: ubuntu-latest
-    # 僅對主 repo 的 push 執行 auto commit（Fork PR 不會 push）
-    if: github.event_name == 'push' && github.repository == github.event.repository.full_name
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies for formatting
+      - name: Install root deps
         run: npm ci --ignore-scripts
 
-      - name: Run Prettier
+      - name: Check formatting
+        id: prettier
+        run: npx prettier --check .
+
+      # ⬇ 只有 main 分支 push 且格式錯誤才自動修正並 commit
+      - name: Auto-format & commit
+        if: failure() && github.ref == 'refs/heads/main' && github.repository == github.event.repository.full_name
         run: npx prettier --write .
 
-      - name: Setup git identity and remote with PAT
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
-
-      - name: Auto-commit changes
+      - name: Push formatted code
+        if: steps.prettier.outcome == 'failure' && github.ref == 'refs/heads/main' && github.repository == github.event.repository.full_name
         uses: stefanzweifel/git-auto-commit-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}   # PAT (repo scope)
         with:
-          commit_message: "style: auto-format code [skip ci]"   # ← 必須加引號
-          push_options: --follow-tags --no-verify
+          commit_message: "style: auto-format code [skip ci]"
+          push_options: --no-verify
 
-  test-format:
-    needs: auto-format
+  backend-test:
     runs-on: ubuntu-latest
-
+    needs: lint-format
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: Install backend deps
+        working-directory: backend
         run: npm ci
 
-      - name: Run tests with coverage (Vitest)
-        run: npm test
+      - name: Vitest (with coverage)
+        working-directory: backend
+        run: npx vitest --coverage.enabled true
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
-          path: coverage/
+          name: backend-coverage
+          path: backend/coverage
 
-      - name: Download previous coverage report
-        uses: dawidd6/action-download-artifact@v3
+      - name: Summary badge (optional)
+        uses: davelosert/vitest-coverage-report-action@v2
         with:
-          name: coverage-report
-          path: old-coverage
-          if_no_artifact_found: warn
+          working-directory: backend
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compare coverage
-        run: |
-          if [ -f old-coverage/coverage-final.json ]; then
-            NEW=$(jq '.total.lines.pct' coverage/coverage-final.json)
-            OLD=$(jq '.total.lines.pct' old-coverage/coverage-final.json)
-            echo "Previous coverage: $OLD%"
-            echo "Current coverage:  $NEW%"
-            awk -v new=$NEW -v old=$OLD 'BEGIN { exit (new < old ? 1 : 0) }'
-          else
-            echo "No previous coverage found. Skipping comparison."
-          fi
+  frontend-test:
+    runs-on: ubuntu-latest
+    needs: lint-format
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      # 若有前端單測，可放 Vitest/Jest；以下示範 e2e
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: frontend
+          build: npm run build
+          start: npm run preview -- --port 5173
+          wait-on: "http://localhost:5173"
