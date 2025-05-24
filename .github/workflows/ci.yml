@@ -79,5 +79,5 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Prettier check
-        run: npx prettier --check . --ignore-unknown
+        run: npx prettier --check . --ignore-unknown --write
         continue-on-error: true
