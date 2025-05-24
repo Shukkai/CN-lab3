@@ -8,83 +8,83 @@ on:
 jobs:
   auto-format:
     runs-on: ubuntu-latest
-    # 僅對主 repo 的 push 執行自動 commit（Fork PR 僅檢查格式，不會 push）
+    # 僅對主 repo 的 push 執行 auto commit（Fork PR 不會 push）
     if: github.event_name == 'push' && github.repository == github.event.repository.full_name
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-    - name: Install deps (formatter only)
-      run: npm ci --ignore-scripts
+      - name: Install dependencies for formatting
+        run: npm ci --ignore-scripts
 
-    - name: Run Prettier
-      run: npx prettier --write .
+      - name: Run Prettier
+        run: npx prettier --write .
 
-    - name: Setup git identity and remote with PAT
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
+      - name: Setup git identity and remote with PAT
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
 
-    - name: Auto-commit changes
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: style: auto-format code [skip ci]
-        push_options: --follow-tags --no-verify
+      - name: Auto-commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: style: auto-format code [skip ci]
+          push_options: --follow-tags --no-verify
 
   test-format:
     needs: auto-format
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: npm
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run tests with coverage (Vitest)
-      run: npm test
+      - name: Run tests with coverage (Vitest)
+        run: npm test
 
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage/
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
 
-    - name: Download previous coverage report
-      uses: dawidd6/action-download-artifact@v3
-      with:
-        name: coverage-report
-        path: old-coverage
-        if_no_artifact_found: warn
+      - name: Download previous coverage report
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: coverage-report
+          path: old-coverage
+          if_no_artifact_found: warn
 
-    - name: Compare coverage
-      run: |
-        if [ -f old-coverage/coverage-final.json ]; then
-          NEW=$(jq '.total.lines.pct' coverage/coverage-final.json)
-          OLD=$(jq '.total.lines.pct' old-coverage/coverage-final.json)
-          echo "Previous coverage: $OLD%"
-          echo "Current coverage:  $NEW%"
-          awk -v new=$NEW -v old=$OLD 'BEGIN { exit (new < old ? 1 : 0) }'
-        else
-          echo "No previous coverage found. Skipping comparison."
-        fi
+      - name: Compare coverage
+        run: |
+          if [ -f old-coverage/coverage-final.json ]; then
+            NEW=$(jq '.total.lines.pct' coverage/coverage-final.json)
+            OLD=$(jq '.total.lines.pct' old-coverage/coverage-final.json)
+            echo "Previous coverage: $OLD%"
+            echo "Current coverage:  $NEW%"
+            awk -v new=$NEW -v old=$OLD 'BEGIN { exit (new < old ? 1 : 0) }'
+          else
+            echo "No previous coverage found. Skipping comparison."
+          fi
