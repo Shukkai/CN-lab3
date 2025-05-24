@@ -32,37 +32,40 @@ jobs:
         path: coverage/
 
     - name: Download previous coverage report
-      id: prev
-      continue-on-error: true
       uses: dawidd6/action-download-artifact@v3
       with:
+        workflow: CI - Test, Coverage, Format  
         name: coverage-report
-        workflow: ci.yaml
         path: old-coverage
+        if_no_artifact_found: warn             
 
     - name: Compare coverage
       run: |
         if [ -f old-coverage/coverage-final.json ]; then
           NEW=$(jq '.total.lines.pct' coverage/coverage-final.json)
           OLD=$(jq '.total.lines.pct' old-coverage/coverage-final.json)
-          echo "Previous: $OLD%, Current: $NEW%"
+          echo "Previous coverage: $OLD%"
+          echo "Current coverage:  $NEW%"
           awk -v new=$NEW -v old=$OLD 'BEGIN { exit (new < old ? 1 : 0) }'
         else
-          echo "No previous coverage – skipping comparison."
-        }
+          echo "No previous coverage found. Skipping comparison."
+        fi
 
     - name: Check & Format Changed Files
       run: |
         CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- '*.ts' '*.js')
         if [ -z "$CHANGED" ]; then
-          echo "No relevant files changed."
+          echo "No relevant TS/JS files changed."
           exit 0
         fi
 
+        echo "Checking formatting for:"
+        echo "$CHANGED"
+
         npx prettier --check $CHANGED || {
-          echo "Formatting needed – applying Prettier"
+          echo "Formatting issues found. Applying Prettier..."
           npx prettier --write $CHANGED
-          git config user.name  "github-actions"
+          git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git commit -am "chore: auto format by Prettier"
           git push
