@@ -1,12 +1,10 @@
-import { defineConfig } from 'vitest/config'
-
 export default defineConfig({
   test: {
     coverage: {
       reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
-      include: ['src'],
+      include: ['src']
     },
-    exclude: ['node_modules', 'dist', 'frontend/tests']
+    exclude: ['node_modules', 'dist', 'frontend/**'] // ✅ 排除 frontend 完整資料夾
   }
 })
