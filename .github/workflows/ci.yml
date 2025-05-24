@@ -33,6 +33,7 @@ jobs:
 
     - name: Download previous coverage report
       uses: dawidd6/action-download-artifact@v3
+      if: github.run_number != 1
       with:
         workflow: ci.yaml                  
         name: coverage-report
