@@ -8,6 +8,7 @@ on:
 jobs:
   auto-format:
     runs-on: ubuntu-latest
+    # 僅對主 repo 的 push 執行自動 commit（Fork PR 僅檢查格式，不會 push）
     if: github.event_name == 'push' && github.repository == github.event.repository.full_name
 
     steps:
