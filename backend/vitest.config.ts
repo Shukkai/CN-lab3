@@ -2,6 +2,9 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    pool: 'forks'
-  }
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+    },
+    exclude: ['node_modules', 'dist'],
+  },
 })
