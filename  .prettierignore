@@ -1,11 +1,11 @@
 .github/**/*.yml
 .vscode/**
-*.lock
-node_modules/**
-dist/**
-coverage/**
 Dockerfile*
 docker-compose.yaml
 k8s/**
-*.svg
+*.lock
+node_modules/**
+coverage/**
+dist/**
 *.md
+*.svg

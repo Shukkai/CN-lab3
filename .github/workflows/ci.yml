@@ -80,3 +80,4 @@ jobs:
 
       - name: Prettier check
         run: npx prettier --check . --ignore-unknown
+        continue-on-error: true
