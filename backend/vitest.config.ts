@@ -5,6 +5,6 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'json', 'html'],
     },
-    exclude: ['node_modules', 'dist'],
+    exclude: ['node_modules', 'dist','frontend/tests'],
   },
 })
