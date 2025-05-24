@@ -7,7 +7,7 @@ on:
 env:
   NODE_VERSION: 20
   COVERAGE_DIR: coverage
-  FORMAT_COMMIT_MSG: "style: auto-format code [skip ci]"
+  FORMAT_COMMIT_MSG: 'style: auto-format code [skip ci]'
 
 jobs:
   test-and-coverage:
@@ -43,7 +43,7 @@ jobs:
           name: coverage-report
           path: old-coverage
           if_no_artifact_found: warn
-          github_token: ${{ secrets.GHCR_TOKEN }}   # 重要：用 PAT 取代預設 Token
+          github_token: ${{ secrets.GHCR_TOKEN }} # 重要：用 PAT 取代預設 Token
 
       - name: Compare coverage
         run: |

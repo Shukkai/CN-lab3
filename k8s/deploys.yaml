@@ -20,17 +20,17 @@ spec:
       labels: { app: mongo }
     spec:
       containers:
-      - name: mongo
-        image: mongo:6.0
-        ports:
-          - containerPort: 27017
-        volumeMounts:
-          - name: data
-            mountPath: /data/db
-        livenessProbe:
-          exec: { command: ["mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"] }
-          initialDelaySeconds: 20
-          periodSeconds: 30
+        - name: mongo
+          image: mongo:6.0
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          livenessProbe:
+            exec: { command: ['mongosh', '--quiet', '--eval', 'db.adminCommand({ ping: 1 })'] }
+            initialDelaySeconds: 20
+            periodSeconds: 30
       volumes:
         - name: data
           persistentVolumeClaim:
@@ -48,22 +48,22 @@ spec:
       labels: { app: backend }
     spec:
       containers:
-      - name: backend
-        image: ghcr.io/shukkai/backend:latest
-        env:
-          - { name: PORT,  value: "8888" }
-          - { name: HOST,  value: "0.0.0.0" }
-          - { name: MONGO_CONNECTION_STRING, value: "mongodb://mongo:27017/myMernApp" }
-        ports:
-          - containerPort: 8888
-        livenessProbe:
-          httpGet: { path: /ping, port: 8888 }
-          initialDelaySeconds: 15
-          periodSeconds: 30
-        readinessProbe:
-          httpGet: { path: /ping, port: 8888 }
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: backend
+          image: ghcr.io/shukkai/backend:latest
+          env:
+            - { name: PORT, value: '8888' }
+            - { name: HOST, value: '0.0.0.0' }
+            - { name: MONGO_CONNECTION_STRING, value: 'mongodb://mongo:27017/myMernApp' }
+          ports:
+            - containerPort: 8888
+          livenessProbe:
+            httpGet: { path: /ping, port: 8888 }
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          readinessProbe:
+            httpGet: { path: /ping, port: 8888 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -77,17 +77,17 @@ spec:
       labels: { app: frontend }
     spec:
       imagePullSecrets:
-      - name: ghcr-creds
+        - name: ghcr-creds
       containers:
-      - name: frontend
-        image: ghcr.io/shukkai/frontend:latest
-        ports:
-          - containerPort: 80
-        livenessProbe:
-          httpGet: { path: /, port: 80 }
-          initialDelaySeconds: 10
-          periodSeconds: 30
-        readinessProbe:
-          httpGet: { path: /, port: 80 }
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: frontend
+          image: ghcr.io/shukkai/frontend:latest
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 5
+            periodSeconds: 10

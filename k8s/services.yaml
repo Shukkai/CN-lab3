@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: mongo
 spec:
-  clusterIP: None                 # Headless，讓 backend 用 mongo:27017 直連
+  clusterIP: None # Headless，讓 backend 用 mongo:27017 直連
   selector: { app: mongo }
   ports:
     - port: 27017

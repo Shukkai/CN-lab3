@@ -45,17 +45,17 @@
 # volumes:
 #   mongo-data:
 
-version: "2.4"
+version: '2.4'
 
 services:
   mongo:
     image: mongo:6.0
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - mongo-data:/data/db
-    healthcheck:         # ← 這段可保留，若要全移除也可直接刪
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 })"]
+    healthcheck: # ← 這段可保留，若要全移除也可直接刪
+      test: ['CMD', 'mongosh', '--quiet', '--eval', 'db.adminCommand({ ping: 1 })']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -69,16 +69,15 @@ services:
       - PORT=8888
       - HOST=0.0.0.0
     ports:
-      - "8888:8888"
+      - '8888:8888'
     depends_on:
       mongo:
-        condition:
-          service_healthy
+        condition: service_healthy
 
   frontend:
     build: ./frontend
     ports:
-      - "5173:80"
+      - '5173:80'
     depends_on:
       - backend
 
