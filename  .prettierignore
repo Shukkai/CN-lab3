@@ -1,15 +1,14 @@
-# .prettierignore
+# Ignore CI, Kubernetes, Docker, build outputs, and other non-source files
+.github/**/*.yml
 *.yml
 *.yaml
-*.env
-*.env.*
-Dockerfile
-**/package-lock.json
-**/pnpm-lock.yaml
-**/tsconfig*.json
-**/README.md
-**/LICENSE
-**/*.svg
-**/*.css
-**/*.html
-**/*.conf
+Dockerfile*
+docker-compose.yaml
+k8s/**
+.vscode/**
+node_modules/**
+dist/**
+coverage/**
+*.lock
+*.svg
+public/**
