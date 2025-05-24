@@ -39,7 +39,10 @@ jobs:
         with:
           name: coverage-report
           path: ./backend/${{ env.COVERAGE_DIR }}/
-
+      - name: Debug artifact contents
+        run: |
+          echo "Old coverage dir:"
+          find ./old-coverage
       - name: Download previous coverage
         id: oldcov
         uses: dawidd6/action-download-artifact@v3
@@ -51,9 +54,9 @@ jobs:
 
       - name: Compare coverage
         run: |
-          echo "🔍 Checking old and new coverage..."
+          echo "Checking old and new coverage..."
           echo "Current run: ./backend/coverage/coverage-final.json"
-          echo "Previous run: ./old-coverage/coverage-report/coverage-final.json"
+          echo "Previous run: ./old-coverage/coverage/coverage-final.json"
 
           if [ -f ./old-coverage/coverage/coverage-final.json ] && [ -f ./backend/coverage/coverage-final.json ]; then
             NEW=$(jq '.total.lines.pct' ./backend/coverage/coverage-final.json)
