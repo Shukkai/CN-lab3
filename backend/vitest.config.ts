@@ -1,3 +1,5 @@
+import { defineConfig } from 'vitest/config'
+
 export default defineConfig({
   test: {
     coverage: {
@@ -5,6 +7,6 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: ['src']
     },
-    exclude: ['node_modules', 'dist', 'frontend/**'] // ✅ 排除 frontend 完整資料夾
+    exclude: ['node_modules', 'dist', 'frontend/**']
   }
 })
