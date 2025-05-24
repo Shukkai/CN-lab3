@@ -1,4 +1,4 @@
-name: CD - Build and Push Docker Image
+name: CD - Build and Push Backend + Frontend
 
 on:
   push:
@@ -6,26 +6,36 @@ on:
       - main
 
 jobs:
-  docker:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout source code
       uses: actions/checkout@v4
 
-    - name: Extract lowercase repo and user
+    - name: Lowercase repo & user
       id: vars
       run: |
         echo "repo_name=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
         echo "user_name=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1 | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-    - name: Log in to GitHub Container Registry (GHCR)
+    - name: Login to GHCR
       run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ steps.vars.outputs.user_name }}" --password-stdin
 
-    - name: Build Docker image
+    # Build & Push Backend
+    - name: Build Backend Image
       run: |
-        docker build -t ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}:latest .
+        docker build -t ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-backend:latest ./backend
 
-    - name: Push Docker image to GHCR
+    - name: Push Backend Image
       run: |
-        docker push ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}:latest
+        docker push ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-backend:latest
+
+    # Build & Push Frontend
+    - name: Build Frontend Image
+      run: |
+        docker build -t ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-frontend:latest ./frontend
+
+    - name: Push Frontend Image
+      run: |
+        docker push ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-frontend:latest
