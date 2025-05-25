@@ -16,9 +16,6 @@ permissions:
 jobs:
   test-and-coverage:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
 
     steps:
       - name: Checkout
@@ -32,17 +29,19 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm ci --ignore-scripts
+        working-directory: ./backend
 
       - name: Run unit tests with coverage
         run: npm run test -- --coverage.enabled true
+        working-directory: ./backend
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/coverage-final.json
+          path: backend/coverage/
 
       - name: Download previous coverage
         id: oldcov
@@ -58,8 +57,17 @@ jobs:
         run: |
           echo "Checking old and new coverage..."
 
-          CURRENT_COV="coverage/coverage-final.json"
+          echo "Listing backend coverage directory:"
+          ls -R backend/coverage || echo "Backend coverage dir missing"
+
+          echo "Listing downloaded old coverage directory:"
+          ls -R old-coverage || echo "Old coverage dir missing"
+
+          CURRENT_COV="backend/coverage/coverage-final.json"
           OLD_COV="old-coverage/coverage-final.json"
+
+          echo "Current coverage path:  $CURRENT_COV"
+          echo "Previous coverage path: $OLD_COV"
 
           if [ -f "$CURRENT_COV" ]; then
             echo "Found new coverage-final.json"
@@ -78,9 +86,7 @@ jobs:
             OLD=$(jq '.total.lines.pct' "$OLD_COV")
             echo "Previous coverage: $OLD%"
             echo "Current coverage:  $NEW%"
-            if [ "$NEW" = "null" ] || [ "$OLD" = "null" ]; then
-              echo "Warning: coverage values are null, skipping comparison."
-            elif (( $(echo "$NEW < $OLD" | bc -l) )); then
+            if (( $(echo "$NEW < $OLD" | bc -l) )); then
               echo "Coverage dropped: $NEW% < $OLD%"
               exit 1
             else
