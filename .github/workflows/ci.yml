@@ -45,11 +45,14 @@ jobs:
           path: backend/coverage/coverage-final.json
 
       - name: Download previous coverage
+        id: oldcov
         uses: dawidd6/action-download-artifact@v3
         with:
           name: coverage-report
           path: old-coverage
+          if_no_artifact_found: warn
           github_token: ${{ secrets.GHCR_TOKEN }}
+        continue-on-error: true
 
       - name: Compare coverage
         run: |
