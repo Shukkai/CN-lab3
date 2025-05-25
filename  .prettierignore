@@ -1,11 +1,15 @@
+# CI/CD, configs, editor settings
 .github/**/*.yml
 .vscode/**
 Dockerfile*
 docker-compose.yaml
 k8s/**
+
+# Build output & dependencies
 *.lock
 node_modules/**
-coverage/**
 dist/**
+
+# Static docs & assets
 *.md
 *.svg
