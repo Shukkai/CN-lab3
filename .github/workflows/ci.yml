@@ -6,7 +6,7 @@ on:
 
 env:
   NODE_VERSION: 20
-  COVERAGE_FILE: coverage/coverage-summary.json
+  COVERAGE_FILE: coverage/coverage-final.json
   FORMAT_COMMIT_MSG: 'style: auto-format code [skip ci]'
 
 permissions:
@@ -38,11 +38,11 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test -- --coverage.enabled true
 
-      - name: Upload coverage summary artifact
+      - name: Upload coverage final artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage/coverage-summary.json
+          path: coverage/coverage-final.json
 
       - name: Download previous coverage
         id: oldcov
@@ -58,19 +58,19 @@ jobs:
         run: |
           echo "Checking old and new coverage..."
 
-          CURRENT_COV="coverage/coverage-summary.json"
-          OLD_COV="old-coverage/coverage-summary.json"
+          CURRENT_COV="coverage/coverage-final.json"
+          OLD_COV="old-coverage/coverage-final.json"
 
           if [ -f "$CURRENT_COV" ]; then
-            echo "Found new coverage-summary.json"
+            echo "Found new coverage-final.json"
           else
-            echo "New coverage-summary.json missing"
+            echo "New coverage-final.json missing"
           fi
 
           if [ -f "$OLD_COV" ]; then
-            echo "Found old coverage-summary.json"
+            echo "Found old coverage-final.json"
           else
-            echo "Old coverage-summary.json missing"
+            echo "Old coverage-final.json missing"
           fi
 
           if [ -f "$CURRENT_COV" ] && [ -f "$OLD_COV" ]; then
