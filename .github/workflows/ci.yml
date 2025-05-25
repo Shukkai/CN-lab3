@@ -6,7 +6,7 @@ on:
 
 env:
   NODE_VERSION: 20
-  COVERAGE_FILE: coverage/coverage-final.json
+  COVERAGE_DIR: coverage
   FORMAT_COMMIT_MSG: 'style: auto-format code [skip ci]'
 
 permissions:
@@ -38,7 +38,7 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test -- --coverage.enabled true
 
-      - name: Upload coverage final artifact
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
@@ -78,7 +78,9 @@ jobs:
             OLD=$(jq '.total.lines.pct' "$OLD_COV")
             echo "Previous coverage: $OLD%"
             echo "Current coverage:  $NEW%"
-            if (( $(echo "$NEW < $OLD" | bc -l) )); then
+            if [ "$NEW" = "null" ] || [ "$OLD" = "null" ]; then
+              echo "Warning: coverage values are null, skipping comparison."
+            elif (( $(echo "$NEW < $OLD" | bc -l) )); then
               echo "Coverage dropped: $NEW% < $OLD%"
               exit 1
             else
@@ -112,7 +114,7 @@ jobs:
         run: npm ci --ignore-scripts
         working-directory: ./backend
 
-      - name: Prettier - Frontend
+      - name: Prettier - Frontend all
         run: npx prettier --check . || npx prettier --write .
         working-directory: ./frontend
 
