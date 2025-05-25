@@ -64,7 +64,7 @@ jobs:
           ls -R old-coverage || echo "Old coverage dir missing"
 
           CURRENT_COV="backend/coverage/coverage-final.json"
-          OLD_COV="old-coverage/coverage/coverage-final.json"
+          OLD_COV="old-coverage/coverage-final.json"
 
           echo "Current coverage path:  $CURRENT_COV"
           echo "Previous coverage path: $OLD_COV"
