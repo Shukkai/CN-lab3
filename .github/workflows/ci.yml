@@ -55,10 +55,13 @@ jobs:
         continue-on-error: true
 
       - name: Compare coverage
-        run: | 
+        run: |
           echo "Checking old and new coverage..."
-          if [ -f ./old-coverage/coverage-final.json ] && [ -f ./coverage/coverage-final.json ]; then
-            NEW=$(jq '.total.lines.pct' ./coverage/coverage-final.json)
+          echo "Current:  ./backend/coverage/coverage-final.json"
+          echo "Previous: ./old-coverage/coverage-final.json"
+
+          if [ -f ./old-coverage/coverage-final.json ] && [ -f ./backend/coverage/coverage-final.json ]; then
+            NEW=$(jq '.total.lines.pct' ./backend/coverage/coverage-final.json)
             OLD=$(jq '.total.lines.pct' ./old-coverage/coverage-final.json)
             echo "Previous: $OLD%"
             echo "Current:  $NEW%"
@@ -71,7 +74,6 @@ jobs:
           else
             echo "Coverage files not found; skipping comparison."
           fi
-
   auto-format:
     needs: test-and-coverage
     runs-on: ubuntu-latest
