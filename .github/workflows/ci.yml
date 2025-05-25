@@ -45,7 +45,7 @@ jobs:
 
       - name: Download previous coverage
         id: oldcov
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v4
         with:
           name: coverage-report 
           path: old-coverage
@@ -57,33 +57,27 @@ jobs:
         run: |
           echo "Checking old and new coverage..."
 
-          echo "Listing backend coverage directory:"
-          ls -R backend/coverage || echo "Backend coverage dir missing"
+          CURRENT_COV_FILE="backend/coverage/coverage-final.json"
+          OLD_COV_FILE="old-coverage/coverage-final.json"
 
-          echo "Listing downloaded old coverage directory:"
-          ls -R old-coverage || echo "Old coverage dir missing"
+          echo "Current coverage path: $CURRENT_COV_FILE"
+          echo "Previous coverage path: $OLD_COV_FILE"
 
-          CURRENT_COV="backend/coverage/coverage-final.json"
-          OLD_COV="old-coverage/coverage-final.json"
-
-          echo "Current coverage path:  $CURRENT_COV"
-          echo "Previous coverage path: $OLD_COV"
-
-          if [ -f "$CURRENT_COV" ]; then
+          if [ -f "$CURRENT_COV_FILE" ]; then
             echo "Found new coverage-final.json"
           else
             echo "New coverage-final.json missing"
           fi
 
-          if [ -f "$OLD_COV" ]; then
+          if [ -f "$OLD_COV_FILE" ]; then
             echo "Found old coverage-final.json"
           else
             echo "Old coverage-final.json missing"
           fi
 
-          if [ -f "$CURRENT_COV" ] && [ -f "$OLD_COV" ]; then
-            NEW=$(jq '[.[] | .lines.pct] | add / length' "$CURRENT_COV")
-            OLD=$(jq '[.[] | .lines.pct] | add / length' "$OLD_COV")
+          if [ -f "$CURRENT_COV_FILE" ] && [ -f "$OLD_COV_FILE" ]; then
+            NEW=$(jq '[.[] | select(.lines.pct != null) | .lines.pct] | if length > 0 then add / length else 0 end' "$CURRENT_COV_FILE")
+            OLD=$(jq '[.[] | select(.lines.pct != null) | .lines.pct] | if length > 0 then add / length else 0 end' "$OLD_COV_FILE")
             echo "Previous coverage: $OLD%"
             echo "Current coverage:  $NEW%"
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
@@ -95,7 +89,6 @@ jobs:
           else
             echo "Coverage files not found; skipping comparison."
           fi
-
   auto-format:
     needs: test-and-coverage
     runs-on: ubuntu-latest
