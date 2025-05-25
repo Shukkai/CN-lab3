@@ -4,7 +4,7 @@ import { myCustomAdd, fabonacci } from '../src/utils/math'
 describe('my testing playground', () => {
   test('it works', () => {
     const expected = true
-    const actual = true // 修正這行 ✅
+    const actual = true
     expect(actual).toBe(expected)
   })
 
