@@ -82,8 +82,8 @@ jobs:
           fi
 
           if [ -f "$CURRENT_COV" ] && [ -f "$OLD_COV" ]; then
-            NEW=$(jq '.total.lines.pct' "$CURRENT_COV")
-            OLD=$(jq '.total.lines.pct' "$OLD_COV")
+            NEW=$(jq '[.[] | .lines.pct] | add / length' "$CURRENT_COV")
+            OLD=$(jq '[.[] | .lines.pct] | add / length' "$OLD_COV")
             echo "Previous coverage: $OLD%"
             echo "Current coverage:  $NEW%"
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
