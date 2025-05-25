@@ -38,11 +38,11 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test -- --coverage.enabled true
 
-      - name: Upload coverage artifact
+      - name: Upload coverage artifact (entire folder)
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: backend/coverage/coverage-final.json
+          path: backend/coverage
 
       - name: Download previous coverage
         id: oldcov
@@ -65,7 +65,7 @@ jobs:
           ls -R ./old-coverage || echo "Old coverage dir missing"
 
           CURRENT_COV="./backend/coverage/coverage-final.json"
-          OLD_COV="./old-coverage/coverage-report/coverage-final.json"
+          OLD_COV="./old-coverage/coverage/coverage-final.json"
 
           echo "Current coverage path:  $CURRENT_COV"
           echo "Previous coverage path: $OLD_COV"
@@ -96,6 +96,7 @@ jobs:
           else
             echo "Coverage files not found; skipping comparison."
           fi
+
   auto-format:
     needs: test-and-coverage
     runs-on: ubuntu-latest
