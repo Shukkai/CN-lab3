@@ -57,14 +57,36 @@ jobs:
       - name: Compare coverage
         run: |
           echo "Checking old and new coverage..."
-          echo "Current:  ./backend/coverage/coverage-final.json"
-          echo "Previous: ./old-coverage/coverage-report/coverage-final.json"
 
-          if [ -f ./old-coverage/coverage-report/coverage-final.json ] && [ -f ./backend/coverage/coverage-final.json ]; then
-            NEW=$(jq '.total.lines.pct' ./backend/coverage/coverage-final.json)
-            OLD=$(jq '.total.lines.pct' ./old-coverage/coverage-report/coverage-final.json)
-            echo "Previous: $OLD%"
-            echo "Current:  $NEW%"
+          echo "Listing backend coverage directory:"
+          ls -R ./backend/coverage || echo "Backend coverage dir missing"
+
+          echo "Listing downloaded old coverage directory:"
+          ls -R ./old-coverage || echo "Old coverage dir missing"
+
+          CURRENT_COV="./backend/coverage/coverage-final.json"
+          OLD_COV="./old-coverage/coverage-report/coverage-final.json"
+
+          echo "Current coverage path:  $CURRENT_COV"
+          echo "Previous coverage path: $OLD_COV"
+
+          if [ -f "$CURRENT_COV" ]; then
+            echo "Found new coverage-final.json"
+          else
+            echo "New coverage-final.json missing"
+          fi
+
+          if [ -f "$OLD_COV" ]; then
+            echo "Found old coverage-final.json"
+          else
+            echo "Old coverage-final.json missing"
+          fi
+
+          if [ -f "$CURRENT_COV" ] && [ -f "$OLD_COV" ]; then
+            NEW=$(jq '.total.lines.pct' "$CURRENT_COV")
+            OLD=$(jq '.total.lines.pct' "$OLD_COV")
+            echo "Previous coverage: $OLD%"
+            echo "Current coverage:  $NEW%"
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
               echo "Coverage dropped: $NEW% < $OLD%"
               exit 1
