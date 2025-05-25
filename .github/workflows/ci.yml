@@ -38,24 +38,22 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test -- --coverage.enabled true
 
-      - name: Upload coverage-final.json only
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: ./coverage/coverage-final.json
+          path: backend/coverage/coverage-final.json
 
       - name: Download previous coverage
-        id: oldcov
         uses: dawidd6/action-download-artifact@v3
         with:
           name: coverage-report
           path: old-coverage
-          if_no_artifact_found: warn
           github_token: ${{ secrets.GHCR_TOKEN }}
 
       - name: Compare coverage
         run: |
-          echo "🔍 Checking old and new coverage..."
+          echo "Checking old and new coverage..."
           if [ -f ./old-coverage/coverage-final.json ] && [ -f ./coverage/coverage-final.json ]; then
             NEW=$(jq '.total.lines.pct' ./coverage/coverage-final.json)
             OLD=$(jq '.total.lines.pct' ./old-coverage/coverage-final.json)
