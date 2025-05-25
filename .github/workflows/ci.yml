@@ -55,7 +55,7 @@ jobs:
         continue-on-error: true
 
       - name: Compare coverage
-        run: |
+        run: | 
           echo "Checking old and new coverage..."
           if [ -f ./old-coverage/coverage-final.json ] && [ -f ./coverage/coverage-final.json ]; then
             NEW=$(jq '.total.lines.pct' ./coverage/coverage-final.json)
