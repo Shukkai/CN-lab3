@@ -47,7 +47,7 @@ jobs:
         id: oldcov
         uses: dawidd6/action-download-artifact@v3
         with:
-          name: coverage-report
+          name: coverage-report 
           path: old-coverage
           if_no_artifact_found: warn
           github_token: ${{ secrets.GHCR_TOKEN }}
