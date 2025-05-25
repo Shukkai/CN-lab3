@@ -76,8 +76,12 @@ jobs:
           fi
 
           if [ -f "$CURRENT_COV_FILE" ] && [ -f "$OLD_COV_FILE" ]; then
-            NEW=$(jq '[.[] | select(.lines.pct != null) | .lines.pct] | if length > 0 then add / length else 0 end' "$CURRENT_COV_FILE")
-            OLD=$(jq '[.[] | select(.lines.pct != null) | .lines.pct] | if length > 0 then add / length else 0 end' "$OLD_COV_FILE")
+            CURRENT_COV_FILE="backend/coverage/coverage-final.json"
+            OLD_COV_FILE="old-coverage/coverage-final.json"
+
+            NEW=$(jq '[.[] | .lines.pct // empty] | if length > 0 then add / length else 0 end' "$CURRENT_COV_FILE")
+            OLD=$(jq '[.[] | .lines.pct // empty] | if length > 0 then add / length else 0 end' "$OLD_COV_FILE")
+
             echo "Previous coverage: $OLD%"
             echo "Current coverage:  $NEW%"
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
