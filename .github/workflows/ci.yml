@@ -16,6 +16,9 @@ permissions:
 jobs:
   test-and-coverage:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
 
     steps:
       - name: Checkout
@@ -29,19 +32,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Install backend dependencies
+      - name: Install dependencies
         run: npm ci --ignore-scripts
-        working-directory: ./backend
 
       - name: Run unit tests with coverage
         run: npm run test -- --coverage.enabled true
-        working-directory: ./backend
 
-      - name: Upload coverage artifact
+      - name: Upload coverage summary artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: backend/coverage/
+          path: backend/coverage/coverage-summary.json
 
       - name: Download previous coverage
         id: oldcov
@@ -57,28 +58,19 @@ jobs:
         run: |
           echo "Checking old and new coverage..."
 
-          echo "Listing backend coverage directory:"
-          ls -R backend/coverage || echo "Backend coverage dir missing"
-
-          echo "Listing downloaded old coverage directory:"
-          ls -R old-coverage || echo "Old coverage dir missing"
-
-          CURRENT_COV="backend/coverage/coverage-final.json"
-          OLD_COV="old-coverage/coverage-final.json"
-
-          echo "Current coverage path:  $CURRENT_COV"
-          echo "Previous coverage path: $OLD_COV"
+          CURRENT_COV="./backend/coverage/coverage-summary.json"
+          OLD_COV="./old-coverage/coverage-summary.json"
 
           if [ -f "$CURRENT_COV" ]; then
-            echo "Found new coverage-final.json"
+            echo "Found new coverage-summary.json"
           else
-            echo "New coverage-final.json missing"
+            echo "New coverage-summary.json missing"
           fi
 
           if [ -f "$OLD_COV" ]; then
-            echo "Found old coverage-final.json"
+            echo "Found old coverage-summary.json"
           else
-            echo "Old coverage-final.json missing"
+            echo "Old coverage-summary.json missing"
           fi
 
           if [ -f "$CURRENT_COV" ] && [ -f "$OLD_COV" ]; then

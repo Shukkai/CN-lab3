@@ -6,7 +6,7 @@ export default defineConfig({
     exclude: ['node_modules', 'dist', 'frontend/**'],
     coverage: {
       all: true,
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json-summary'], // ← 這裡要加 json-summary
       reportsDirectory: './coverage',
       include: ['src/**/*.ts'],
       exclude: ['src/types/**'],
