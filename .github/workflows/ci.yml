@@ -9,6 +9,10 @@ env:
   COVERAGE_DIR: coverage
   FORMAT_COMMIT_MSG: 'style: auto-format code [skip ci]'
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   test-and-coverage:
     runs-on: ubuntu-latest
@@ -32,13 +36,13 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Run unit tests with coverage
-        run: npx vitest --coverage.enabled true
+        run: npm run test -- --coverage.enabled true
 
-      - name: Upload only coverage-final.json
+      - name: Upload coverage-final.json only
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: ./backend/coverage/coverage-final.json
+          path: ./coverage/coverage-final.json
 
       - name: Download previous coverage
         id: oldcov
@@ -52,11 +56,8 @@ jobs:
       - name: Compare coverage
         run: |
           echo "🔍 Checking old and new coverage..."
-          echo "Current:  ./backend/coverage/coverage-final.json"
-          echo "Previous: ./old-coverage/coverage-final.json"
-
-          if [ -f ./old-coverage/coverage-final.json ] && [ -f ./backend/coverage/coverage-final.json ]; then
-            NEW=$(jq '.total.lines.pct' ./backend/coverage/coverage-final.json)
+          if [ -f ./old-coverage/coverage-final.json ] && [ -f ./coverage/coverage-final.json ]; then
+            NEW=$(jq '.total.lines.pct' ./coverage/coverage-final.json)
             OLD=$(jq '.total.lines.pct' ./old-coverage/coverage-final.json)
             echo "📊 Previous: $OLD%"
             echo "📈 Current:  $NEW%"
@@ -73,12 +74,9 @@ jobs:
   auto-format:
     needs: test-and-coverage
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -89,8 +87,22 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Install dependencies
+      - name: Install dependencies for frontend
         run: npm ci --ignore-scripts
+        working-directory: ./frontend
 
-      - name: Prettier check + write (no commit)
-        run: npx prettier --check . --ignore-unknown || npx prettier --write . --ignore-unknown
+      - name: Install dependencies for backend
+        run: npm ci --ignore-scripts
+        working-directory: ./backend
+
+      - name: Prettier - Frontend all
+        run: npx prettier --check . || npx prettier --write .
+        working-directory: ./frontend
+
+      - name: Prettier - Backend src/
+        run: npx prettier --check 'src/**/*.{js,ts,tsx,json,cjs,mjs}' || npx prettier --write 'src/**/*.{js,ts,tsx,json,cjs,mjs}'
+        working-directory: ./backend
+
+      - name: Prettier - Backend test/
+        run: npx prettier --check 'test/**/*.{js,ts,tsx,json,cjs,mjs}' || npx prettier --write 'test/**/*.{js,ts,tsx,json,cjs,mjs}'
+        working-directory: ./backend
