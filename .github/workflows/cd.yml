@@ -10,32 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Lowercase repo & user
+      - name: Set lowercase repo and user
         id: vars
         run: |
           echo "repo_name=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
           echo "user_name=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1 | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
-      - name: Login to GHCR
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ steps.vars.outputs.user_name }}" --password-stdin
+      - name: Login to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ steps.vars.outputs.user_name }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
-      # Build & Push Backend
-      - name: Build Backend Image
-        run: |
-          docker build -t ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-backend:latest ./backend
+      - name: Build & Push Backend
+        uses: docker/build-push-action@v4
+        with:
+          context: backend
+          push: true
+          tags: ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-backend:latest
 
-      - name: Push Backend Image
-        run: |
-          docker push ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-backend:latest
-
-      # Build & Push Frontend
-      - name: Build Frontend Image
-        run: |
-          docker build -t ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-frontend:latest ./frontend
-
-      - name: Push Frontend Image
-        run: |
-          docker push ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-frontend:latest
+      - name: Build & Push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: frontend
+          push: true
+          tags: ghcr.io/${{ steps.vars.outputs.user_name }}/${{ steps.vars.outputs.repo_name }}-frontend:latest

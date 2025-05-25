@@ -59,16 +59,16 @@ jobs:
           if [ -f ./old-coverage/coverage-final.json ] && [ -f ./coverage/coverage-final.json ]; then
             NEW=$(jq '.total.lines.pct' ./coverage/coverage-final.json)
             OLD=$(jq '.total.lines.pct' ./old-coverage/coverage-final.json)
-            echo "📊 Previous: $OLD%"
-            echo "📈 Current:  $NEW%"
+            echo "Previous: $OLD%"
+            echo "Current:  $NEW%"
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
-              echo "❌ Coverage dropped"
+              echo "Coverage dropped"
               exit 1
             else
-              echo "✅ Coverage improved or same"
+              echo "Coverage improved or same"
             fi
           else
-            echo "⚠️ Coverage files not found; skipping comparison."
+            echo "Coverage files not found; skipping comparison."
           fi
 
   auto-format:
