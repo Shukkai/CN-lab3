@@ -59,31 +59,17 @@ jobs:
 
           CURRENT_COV_FILE="backend/coverage/coverage-final.json"
           OLD_COV_FILE="old-coverage/coverage-final.json"
-
-          echo "Current coverage path: $CURRENT_COV_FILE"
-          echo "Previous coverage path: $OLD_COV_FILE"
-
-          if [ -f "$CURRENT_COV_FILE" ]; then
-            echo "Found new coverage-final.json"
-          else
-            echo "New coverage-final.json missing"
-          fi
-
-          if [ -f "$OLD_COV_FILE" ]; then
-            echo "Found old coverage-final.json"
-          else
-            echo "Old coverage-final.json missing"
-          fi
+          echo "Checking coverage files..."
+          echo "Current:  $CURRENT_COV_FILE"
+          echo "Previous: $OLD_COV_FILE"
 
           if [ -f "$CURRENT_COV_FILE" ] && [ -f "$OLD_COV_FILE" ]; then
-            CURRENT_COV_FILE="backend/coverage/coverage-final.json"
-            OLD_COV_FILE="old-coverage/coverage-final.json"
-
-            NEW=$(jq '[.[] | .lines.pct // empty] | if length > 0 then add / length else 0 end' "$CURRENT_COV_FILE")
-            OLD=$(jq '[.[] | .lines.pct // empty] | if length > 0 then add / length else 0 end' "$OLD_COV_FILE")
+            NEW=$(jq 'reduce to_entries[] as $f ({"covered":0,"total":0}; .covered += ($f.value.lines.covered // 0) | .total += ($f.value.lines.total // 0)) | if .total > 0 then (.covered / .total * 100) else 0 end' "$CURRENT_COV_FILE")
+            OLD=$(jq 'reduce to_entries[] as $f ({"covered":0,"total":0}; .covered += ($f.value.lines.covered // 0) | .total += ($f.value.lines.total // 0)) | if .total > 0 then (.covered / .total * 100) else 0 end' "$OLD_COV_FILE")
 
             echo "Previous coverage: $OLD%"
             echo "Current coverage:  $NEW%"
+
             if (( $(echo "$NEW < $OLD" | bc -l) )); then
               echo "Coverage dropped: $NEW% < $OLD%"
               exit 1
@@ -91,7 +77,7 @@ jobs:
               echo "Coverage OK: $NEW% >= $OLD%"
             fi
           else
-            echo "Coverage files not found; skipping comparison."
+            echo "Missing coverage-final.json files; skipping comparison."
           fi
   auto-format:
     needs: test-and-coverage
