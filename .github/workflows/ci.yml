@@ -53,7 +53,7 @@ jobs:
           github_token: ${{ secrets.GHCR_TOKEN }}
         continue-on-error: true
 
-     - name: Compare coverage
+      - name: Compare coverage
         run: |
           echo "Checking old and new coverage..."
 
