@@ -6,7 +6,7 @@ on:
 
 env:
   NODE_VERSION: 20
-  COVERAGE_DIR: coverage
+  COVERAGE_FILE: coverage/coverage-summary.json
   FORMAT_COMMIT_MSG: 'style: auto-format code [skip ci]'
 
 permissions:
@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: backend/coverage/coverage-summary.json
+          path: coverage/coverage-summary.json
 
       - name: Download previous coverage
         id: oldcov
@@ -58,8 +58,8 @@ jobs:
         run: |
           echo "Checking old and new coverage..."
 
-          CURRENT_COV="./backend/coverage/coverage-summary.json"
-          OLD_COV="./old-coverage/coverage-summary.json"
+          CURRENT_COV="coverage/coverage-summary.json"
+          OLD_COV="old-coverage/coverage-summary.json"
 
           if [ -f "$CURRENT_COV" ]; then
             echo "Found new coverage-summary.json"
@@ -112,7 +112,7 @@ jobs:
         run: npm ci --ignore-scripts
         working-directory: ./backend
 
-      - name: Prettier - Frontend all
+      - name: Prettier - Frontend
         run: npx prettier --check . || npx prettier --write .
         working-directory: ./frontend
 
