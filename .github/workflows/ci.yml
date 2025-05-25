@@ -16,9 +16,6 @@ permissions:
 jobs:
   test-and-coverage:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
 
     steps:
       - name: Checkout
@@ -32,17 +29,19 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm ci --ignore-scripts
+        working-directory: ./backend
 
       - name: Run unit tests with coverage
         run: npm run test -- --coverage.enabled true
+        working-directory: ./backend
 
-      - name: Upload coverage artifact (entire folder)
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: backend/coverage
+          path: backend/coverage/
 
       - name: Download previous coverage
         id: oldcov
@@ -59,13 +58,13 @@ jobs:
           echo "Checking old and new coverage..."
 
           echo "Listing backend coverage directory:"
-          ls -R ./backend/coverage || echo "Backend coverage dir missing"
+          ls -R backend/coverage || echo "Backend coverage dir missing"
 
           echo "Listing downloaded old coverage directory:"
-          ls -R ./old-coverage || echo "Old coverage dir missing"
+          ls -R old-coverage || echo "Old coverage dir missing"
 
-          CURRENT_COV="./backend/coverage/coverage-final.json"
-          OLD_COV="./old-coverage/coverage/coverage-final.json"
+          CURRENT_COV="backend/coverage/coverage-final.json"
+          OLD_COV="old-coverage/coverage/coverage-final.json"
 
           echo "Current coverage path:  $CURRENT_COV"
           echo "Previous coverage path: $OLD_COV"
